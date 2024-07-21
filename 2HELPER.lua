@@ -82,6 +82,7 @@ function main()
 	local lastver = update():getLastVersion()
 	if tonumber(thisScript().version) < tonumber(lastver) then
 		chat_message('Нам необходимо обновиться до версии {ffdead}'..lastver, 0xffdead)
+		update():download()
 		return
 	end
 
@@ -93,6 +94,7 @@ function main()
 	sampRegisterChatCommand("masstp", cmd_smshere)
 	sampRegisterChatCommand("fid", cmd_fid)
 	sampRegisterChatCommand("yinfo", cmd_yinfo)
+	sampRegisterChatCommand("sskin", cmd_sskin)
 	if tonumber(thisScript().version) > tonumber(lastver) then
 		chat_message('У вас установлена {ffdead}версия разработчика')
 	end
@@ -156,6 +158,7 @@ function cmd_yinfo()
 	{ffdead}/prolet {ffffff}- Быстрый invite в банду\
 	{ffdead}/smshere {ffffff}- Телепортация к себе игроков, написавших в смс\
 	{ffdead}/fid {ffffff}- ID фракций\
+	{ffdead}/sskin [id] {ffffff}- Выдать себе скин\
 	{ffdead}/yinfo {ffffff}- Команды скрипта",
 	"Закрыть",
 	"",
@@ -306,6 +309,19 @@ function cmd_rysetskin(arg)
 			rgive = false
 		end)
 	else chat_message("Неверно указаны параметры (Используйте: /rysetskin [радиус] [скин])") return end
+end
+
+
+function cmd_sskin(arg)
+	if getGameGlobal(AdminLevelGlobal) < 1 and getGameGlobal(AdminLevelGlobal) ~= -2 then
+		chat_message('Вы не авторизованы в админку. Введите команду еще раз после авторизации')
+		sampSendChat('/alogin')
+		return
+	end
+	local skin = string.match(arg, "(%d+)")
+	if skin ~= nil and skin ~= "" then
+		sampSendChat('/ysetskin '..select(2, sampGetPlayerIdByCharHandle(PLAYER_PED))..' '..skin)
+	else chat_message("Неверно указаны параметры (Используйте: /sskin [скин])") return end
 end
 
 function sampev.onServerMessage(color, text)

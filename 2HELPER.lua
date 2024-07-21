@@ -80,6 +80,7 @@ function main()
     while not isSampAvailable() do wait(100) end 
 
 	local lastver = update():getLastVersion()
+	if lastver == "UNKNOWN" then lastver = "0.0" end
 	if tonumber(thisScript().version) < tonumber(lastver) then
 		chat_message('Нам необходимо обновиться до версии {ffdead}'..lastver, 0xffdead)
 		update():download()
@@ -95,7 +96,7 @@ function main()
 	sampRegisterChatCommand("fid", cmd_fid)
 	sampRegisterChatCommand("yinfo", cmd_yinfo)
 	sampRegisterChatCommand("sskin", cmd_sskin)
-	if tonumber(thisScript().version) > tonumber(lastver) then
+	if tonumber(thisScript().version) > tonumber(lastver) and lastver ~= "0.0" then
 		chat_message('У вас установлена {ffdead}версия разработчика')
 	end
 	chat_message('Загружен. Автор: {ffdead}scandalque{ffffff}. Команды: {ffdead}/yinfo{ffffff}. Версия скрипта: {ffdead}'..thisScript().version)

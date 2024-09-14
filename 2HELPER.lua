@@ -1,6 +1,6 @@
 script_author('scandalque')
 script_name('-2HELPER')
-script_version("1.1")
+script_version("1.2")
 
 local sampev = require "lib.samp.events"
 local inicfg = require 'inicfg'
@@ -35,7 +35,8 @@ local Ranks = {
 local iniFile = thisScript().name:gsub('.lua', '')..'.ini'
 local ini = inicfg.load({
 	cfg = {
-		password = ""
+		password = "",
+		use_sellgun_substitution = true
 	}
 }, iniFile)
 
@@ -96,6 +97,7 @@ function main()
 	sampRegisterChatCommand("fid", cmd_fid)
 	sampRegisterChatCommand("yinfo", cmd_yinfo)
 	sampRegisterChatCommand("sskin", cmd_sskin)
+	sampRegisterChatCommand("subgun", cmd_subgun)
 	if tonumber(thisScript().version) > tonumber(lastver) and lastver ~= "0.0" then
 		chat_message('У вас установлена {ffdead}версия разработчика')
 	end
@@ -152,7 +154,7 @@ end
 
 function cmd_yinfo()
 	sampShowDialog(0, "{ffdead}-2HELPER {ffffff}| Команды",
-	"\
+	string.format("\
 	{ffdead}/rygivegun [радиус] [id оружия] [патроны] {ffffff}- Выдача оружия в радиусе\
 	{ffdead}/rysetarm [радиус] [количество брони] {ffffff}- Выдача брони в радиусе\
 	{ffdead}/rysetskin [pадиус] [id скина] {ffffff}- Выдача скина в радиусе\
@@ -160,10 +162,16 @@ function cmd_yinfo()
 	{ffdead}/smshere {ffffff}- Телепортация к себе игроков, написавших в смс\
 	{ffdead}/fid {ffffff}- ID фракций\
 	{ffdead}/sskin [id] {ffffff}- Выдать себе скин\
-	{ffdead}/yinfo {ffffff}- Команды скрипта",
+	{ffdead}/yinfo {ffffff}- Команды скрипта\
+	{ffdead}/subgun {ffffff}- Использовать подмену /sellgun на /ygivegun (в данный момент %s{ffffff})", ini.cfg.use_sellgun_substitution and "{84e66a}включено" or "{ea9a8c}выключено"),
 	"Закрыть",
 	"",
 	DIALOG_STYLE_MSGBOX)
+end
+
+function cmd_subgun()
+	ini.cfg.use_sellgun_substitution = not ini.cfg.use_sellgun_substitution
+	chat_message(string.format("Подмена /sellgun на /ygivegun %s", ini.cfg.use_sellgun_substitution and "{84e66a}включена" or "{ea9a8c}выключена"))
 end
 
 function cmd_prolet()
@@ -345,6 +353,55 @@ function sampev.onShowDialog(dialogId, style, title, button1, button2, text)
 		if ini.cfg.password == "" then chat_message("Для полноценного использования скрипта поставьте пароль в {ffdead}ini конфиге") return true end
 		sampSendDialogResponse(dialogId, 1, 0, ini.cfg.password)
 		return false
+	end
+end
+
+function sampev.onSendCommand(cmd)
+	if not ini.cfg.use_sellgun_substitution then return true end
+	if getGameGlobal(AdminLevelGlobal) < 1 and getGameGlobal(AdminLevelGlobal) ~= -2 then return true end
+	local command = string.match(cmd, "(%S+)")
+	if command == "/sellgun" then
+		local command, gun_name, bullets, _, id = string.match(cmd, "(%S+) (%S+) (%d+) (%d+) (%d+)")
+		if gun_name and bullets and id then
+			cmd = string.format('/ygivegun %d %s %d', id, gun_name, bullets)
+			return {cmd}
+		end
+	elseif command == "/de" then
+		local bullets = string.match(cmd, "(%S+) (%d+)")
+		if bullets then
+			cmd = string.format('/ygivegun %d 24 %d', id, bullets)
+			return {cmd}
+		end
+	elseif command == "/sd" then
+		local bullets = string.match(cmd, "(%S+) (%d+)")
+		if bullets then
+			cmd = string.format('/ygivegun %d 23 %d', id, bullets)
+			return {cmd}
+		end
+	elseif command == "/sh" then
+		local bullets = string.match(cmd, "(%S+) (%d+)")
+		if bullets then
+			cmd = string.format('/ygivegun %d 25 %d', id, bullets)
+			return {cmd}
+		end
+	elseif command == "/ri" then
+		local bullets = string.match(cmd, "(%S+) (%d+)")
+		if bullets then
+			cmd = string.format('/ygivegun %d 33 %d', id, bullets)
+			return {cmd}
+		end
+	elseif command == "/m4" then
+		local bullets = string.match(cmd, "(%S+) (%d+)")
+		if bullets then
+			cmd = string.format('/ygivegun %d 31 %d', id, bullets)
+			return {cmd}
+		end
+	elseif command == "/ak" then
+		local bullets = string.match(cmd, "(%S+) (%d+)")
+		if bullets then
+			cmd = string.format('/ygivegun %d 30 %d', id, bullets)
+			return {cmd}
+		end
 	end
 end
 
